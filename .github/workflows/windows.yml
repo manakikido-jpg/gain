@@ -16,11 +16,21 @@ jobs:
       - name: Audio processing, simulated streams, and real Tk widget tests
         run: python -m unittest discover -s tests -v
       - name: Build executable
-        run: python -m PyInstaller --noconfirm --onefile --windowed --name MicBoost main.py
+        run: python -m PyInstaller --noconfirm --onedir --windowed --name MicBoost main.py
+      - name: Check packaged executable
+        shell: pwsh
+        run: |
+          $process = Start-Process -FilePath "dist\MicBoost\MicBoost.exe" -ArgumentList "--self-test" -PassThru
+          if (-not $process.WaitForExit(60000)) {
+            $process.Kill()
+            throw "Packaged executable timed out"
+          }
+          if ($process.ExitCode -ne 0) { throw "Packaged executable failed: $($process.ExitCode)" }
       - uses: actions/upload-artifact@v4
         with:
           name: MicBoost-Windows
           path: |
-            dist/MicBoost.exe
+            dist/MicBoost/
             WINDOWS_GUIDE.md
+            WINDOWS_SECURITY.md
           if-no-files-found: error

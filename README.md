@@ -7,7 +7,8 @@ WindowsでUSBマイク入力を0〜36 dB増幅し、選択した音声出力へ�
 FDUCE-SL40XとNCGGY-2025-USB-XLR-2Mを想定していますが、実機での動作は未検証です。
 
 **初めて使う方は [Windows・Discordの設定ガイド](WINDOWS_GUIDE.md) を順番に進めてください。**
-`Setup.bat` で初回準備、`Start.bat` で起動できます。
+Pythonから起動する場合は `Setup.bat` で初回準備、`Start.bat` で起動できます。
+batがブロックされる場合とexe配布・署名については [Windowsのセキュリティ対策](WINDOWS_SECURITY.md) を参照してください。
 
 ## Windowsでの準備
 
@@ -41,10 +42,10 @@ py -m venv .venv
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install pyinstaller
-.\.venv\Scripts\python.exe -m PyInstaller --noconfirm --onefile --windowed --name MicBoost main.py
+.\.venv\Scripts\python.exe -m PyInstaller --noconfirm --onedir --windowed --name MicBoost main.py
 ```
 
-`dist\MicBoost.exe` を起動します。VB-CABLEドライバーは別途必要です。
+`dist\MicBoost\MicBoost.exe` を起動します。同梱の `_internal` フォルダーも必要です。VB-CABLEドライバーは別途必要です。未署名のexeがWindowsにブロックされる可能性は残ります。
 Linux上でWindows用exeを作る手順ではありません。
 
 ## 検証

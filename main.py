@@ -261,6 +261,31 @@ class MicrophoneBoost:
         self.root.destroy()
 
 
+def packaged_self_test():
+    """Check bundled libraries and Tk without recording or changing user settings."""
+    from pathlib import Path
+    import tempfile
+    signal = np.full((480, 1), 0.01, dtype=np.float32)
+    result = VoiceProcessor().process(signal, 20)
+    np.testing.assert_allclose(result, 0.1, rtol=1e-6)
+    sd.query_devices()
+    with tempfile.TemporaryDirectory() as directory:
+        path = Path(directory) / 'settings.json'
+        preferences.save_preferences({'gain_db': 25}, path)
+        assert preferences.load_preferences(path)['gain_db'] == 25
+    window = tk.Tk()
+    window.withdraw()
+    window.update()
+    window.destroy()
+
+
+if __name__ == "__main__" and '--self-test' in sys.argv:
+    try:
+        packaged_self_test()
+    except Exception:
+        sys.exit(1)
+    sys.exit(0)
+
 if __name__ == "__main__":
     root = tk.Tk()
     MicrophoneBoost(root)
