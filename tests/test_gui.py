@@ -9,6 +9,10 @@ from main import MicrophoneBoost
 
 class GuiTests(unittest.TestCase):
     def setUp(self):
+        for name, value in [('load_preferences', {}), ('save_preferences', None)]:
+            patcher = patch('main.preferences.' + name, return_value=value)
+            patcher.start()
+            self.addCleanup(patcher.stop)
         try:
             self.root = tk.Tk()
         except tk.TclError as error:
@@ -38,7 +42,24 @@ class GuiTests(unittest.TestCase):
         self.assertEqual(app.button.cget('text'), '開始')
         self.assertTrue(self.root.winfo_exists())
         app.stop()
-        self.root.update()
+
+    @patch('main.preferences.load_preferences', return_value={
+        'gain_db': 25, 'input': 'USB microphone (Windows WASAPI)',
+        'output': 'CABLE Input (Windows WASAPI)', 'auto_start': True,
+        'audio': {'low_cut': True, 'noise_gate': True, 'compressor': False, 'gate_db': -60}})
+    def test_saved_settings_are_restored_in_real_widgets(self, load):
+        app = self.create_app([
+            {'name': 'USB microphone', 'hostapi': 0, 'max_input_channels': 1, 'max_output_channels': 0},
+            {'name': 'CABLE Input', 'hostapi': 0, 'max_input_channels': 0, 'max_output_channels': 2},
+        ])
+        self.assertEqual(app.gain_db, 25)
+        self.assertTrue(app.auto_start.get())
+        self.assertTrue(app.effect_vars['low_cut'].get())
+        self.assertIn('CABLE Input', app.destination.get())
+        self.assertIsNotNone(app.auto_timer)
+        app.effect_vars['compressor'].set(True)
+        app.update_effects()
+        self.assertTrue(app.audio_options['compressor'])
 
     def test_widgets_and_device_selection(self):
         app = self.create_app([

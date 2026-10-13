@@ -5,11 +5,16 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 import numpy as np
+from audio import VoiceProcessor
 from main import MicrophoneBoost
 
 
 def make_app():
     app = MicrophoneBoost.__new__(MicrophoneBoost)
+    app.auto_timer = None
+    app.persist_settings = MagicMock()
+    app.processor = VoiceProcessor()
+    app.audio_options = {}
     app.lock = threading.Lock()
     app.chunks = deque()
     app.offset = 0
